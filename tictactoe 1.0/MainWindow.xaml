@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="1080" Width="1920" >
     <Grid  >
-        <Grid HorizontalAlignment="Left" Margin="10,10,0,10" Width="1892"  Name="grid">
+        <Grid HorizontalAlignment="Left" Margin="10,10,10,10" Width="1892"  Name="grid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
