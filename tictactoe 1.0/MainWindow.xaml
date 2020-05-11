@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:tictactoe_1._0"
         mc:Ignorable="d"
-        Title="MainWindow" Height="1080" Width="1920" >
+        Title="Piškvorky" Height="auto" Width="auto" >
     <Grid  >
-        <Grid HorizontalAlignment="Left" Margin="10,10,10,10" Width="1892"  Name="grid">
+        <Grid HorizontalAlignment="Left" Margin="10,10,10,10" Width="1892" Height="1064" Name="grid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>

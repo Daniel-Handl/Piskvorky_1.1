@@ -147,7 +147,7 @@ namespace tictactoe_1._0
                 ys -= yc;
             }
 
-            if (contLenght == 5)
+            if (contLenght >= 5)
             {
                 MessageBox.Show($"Hráč ktarý hrál s {cont} vyhrál :D");
                 Array.Clear(pole, 0, pole.Length);
