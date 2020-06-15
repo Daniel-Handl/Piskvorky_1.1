@@ -117,7 +117,7 @@ namespace tictactoe_1._0
                 if (xo == "X") { xo = "O"; }
                 else { xo = "X"; }
             
-               if (AImove)
+               if (AImove & !winmovecheck)
                {
                    AImove = false;
                    BClick(pl.AIMove(xo));
