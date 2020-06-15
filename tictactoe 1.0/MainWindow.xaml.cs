@@ -19,25 +19,30 @@ namespace tictactoe_1._0
     /// Interakční logika pro MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
-    {   
-        public Pole pl = new Pole(64, 36);
+    {
+
+        public bool AImove = true;
+        public Pole pl = new Pole(3, 3);
         public string xo = "X";
+        public int wincountpl = 0;
+        public int wincountAI = 0;
         public MainWindow()
         {
             InitializeComponent();
-           
-            
-            for (int i = 0; i < 64; i++)
+
+
+            for (int i = 0; i < 3; i++)
             {
-                for (int a = 0; a < 36; a++)
+                for (int a = 0; a < 3; a++)
                 {
                     Button btn = new Button();
-                    btn.Height = 29;
-                    btn.Width = 29;
+                    btn.Height = 250;
+                    btn.Width = 250;
                     btn.VerticalAlignment = VerticalAlignment.Top;
                     btn.HorizontalAlignment = HorizontalAlignment.Left;
                     btn.Click += new RoutedEventHandler(Button_Click);
-                    btn.Content = "  ";
+                    btn.Content = " ";
+                    btn.FontSize = 80;
                     btn.Tag = $"{i}_{a}";
                     btn.SetValue(Grid.RowProperty, a);
                     btn.SetValue(Grid.ColumnProperty, i);
@@ -46,9 +51,25 @@ namespace tictactoe_1._0
             }
         }
 
+        public void BClick(string t)
+        {
+            
+            foreach (Button item in grid.Children)
+            {
+               
+                if ((string)item.Tag==t)
+                {
+                    Button_Click(item, new RoutedEventArgs());
+                }
+            }
+        }
+
+
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
            
+            bool winmovecheck = false;
             Button btn = sender as Button;
             String[] spltag =  btn.Tag.ToString().Split('_');
             int x = Convert.ToInt32(spltag[0]);
@@ -57,20 +78,59 @@ namespace tictactoe_1._0
             {
             btn.Content = xo;
             btn.Name = "end";
-                if (pl.Move( x, y, xo))
+            pl.Move(x, y, xo);
+
+                if (pl.WinChecker(x, y, xo,pl.pole)=="X"|| pl.WinChecker(x, y, xo,pl.pole) =="O")
                 {
-                    string ox = "O";
+
+                    winmovecheck = true;
+                    //if (AImove)
+                    //{
+                    //    wincountAI++;
+                        
+                    //}
+                    //else
+                    //{
+                    //    wincountpl++;
+                    //}
+                    MessageBox.Show($"Hráč ktarý hrál s {pl.WinChecker(x, y, xo,pl.pole)} vyhrál :D");
+                    Array.Clear(pl.pole, 0, pl.pole.Length);
                     foreach (Button item in grid.Children)
                     {
                         item.Content = " ";
-                        item.Name = "btn";
-                        xo = ox;
-                        if (ox == "X") { ox = "O"; }
-                        else { ox = "X"; }
+                        item.Name = "btn";          
                     }
                 }
+                else if (pl.WinChecker(x, y, xo, pl.pole) == "  ")
+                {
+
+                            MessageBox.Show($"Remíza :D");
+                    winmovecheck = true;
+                    foreach (Button item in grid.Children)
+                             {
+                                 item.Content = " ";
+                                 item.Name = "btn";
+                             }
+                    Array.Clear(pl.pole, 0, pl.pole.Length);
+                }
+
                 if (xo == "X") { xo = "O"; }
-                else { xo = "X"; }                
+                else { xo = "X"; }
+            
+               if (AImove)
+               {
+                   AImove = false;
+                   BClick(pl.AIMove(xo));
+               }
+               else
+               {
+                   AImove = true;
+               }
+               if (winmovecheck)
+               {
+                   AImove = true;
+               }
+
             }
             if (btn.Content.ToString()=="X")
             {
@@ -80,81 +140,312 @@ namespace tictactoe_1._0
             {
                 btn.Foreground = Brushes.Blue;
             }
-            
+
         }
     }
 
    public class Pole
     {
-        string[,] pole;
+       public string[,] pole;
             
        public Pole(int xWidth,int yHeight)
         {
             pole = new string[xWidth, yHeight];
         }
 
-       public bool Move(int x, int y, string cont)
+       public void Move(int x, int y, string cont)
        {
-            pole[x, y] = cont;
-            return WinChecker(x, y, cont);
+         
+               pole[x, y] = cont;     
+                                
        }
 
-        private bool WinChecker(int x, int y, string cont)
-        {
-            if (pole[x-1,y-1]==cont||pole[x+1,y+1]==cont)
+       public string AIMove (string cont)
+       {
+            int score = 0;
+            Point p = new Point();
+          string[,] tpole = pole;
+            int Minv = int.MinValue;
+            for (int x = 0; x < 3; x++)
             {
-                return LenghtChecker(x,y,-1,-1,cont);
+                for (int y = 0; y < 3; y++)
+                {
+                    if (tpole[x, y] == null)
+                    {
+                        tpole[x, y] = "cont";
+                        score = Minimax(tpole, true,cont);
+                        tpole[x, y] = null;
+                        if (score>Minv)
+                        {
+                            Minv = score;
+                            p.X = x;
+                            p.Y = y;
+                        }
+                    }
+                }
             }
+            return $"{p.X}_{p.Y}";
 
-            if (pole[x, y - 1] == cont || pole[x, y + 1] == cont)
-            {
-                return LenghtChecker(x, y, 0, -1, cont);
-            }
-
-            if (pole[x + 1, y - 1] == cont || pole[x - 1, y + 1] == cont)
-            {
-                return LenghtChecker(x, y, 1, -1, cont);
-            }
-
-            if (pole[x - 1, y] == cont || pole[x + 1, y] == cont)
-            {
-                return LenghtChecker(x, y, -1,0, cont);
-            }
-            return false;
         }
 
-        private bool LenghtChecker(int x, int y, int xc, int yc,string cont)
+        int Minimax(string[,] tpole,bool isMax,string cont)
+        {
+            int score = 0;
+            int Minv = int.MinValue;
+            int Maxv = int.MaxValue;
+            string acont = "";
+            if (cont == "O") { acont = "X"; }
+            else { acont = "O"; }
+
+            if (isMax)
+            {
+                for (int x = 0; x < 3; x++)
+                {
+                    for (int y = 0; y < 3; y++)
+                    {
+                        if (tpole[x, y] == null)
+                        {
+                            if (WinChecker(x, y, cont, tpole) == cont)
+                            {
+                                return +1;
+                            }
+                            if (WinChecker(x, y, acont, tpole) == acont)
+                            {
+                                return -1;
+                            }
+                            if (WinChecker(x, y, cont, tpole) == "  ")
+                            {
+                                return 0;
+                            }
+                            if (WinChecker(x, y, acont, tpole) == "  ")
+                            {
+                                return 0;
+                            }
+
+                        }
+                    }
+                }
+
+
+                  for (int x = 0; x < 3; x++)
+                  {
+                      for (int y = 0; y < 3; y++)
+                      {
+
+                          if (tpole[x, y] == null)
+                          {
+                              tpole[x, y] = cont;
+                              score = Minimax(tpole, false,cont);
+                              tpole[x, y] = null;
+                              if (score > Minv)
+                              {
+                                  Minv = score;
+                              }
+                          }
+                      }
+                  }
+                  return Minv; 
+            }
+            else 
+            {
+
+                for (int x = 0; x < 3; x++)
+                {
+                    for (int y = 0; y < 3; y++)
+                    {
+                        if (tpole[x, y] == null)
+                        {
+                            if (WinChecker(x, y, cont, tpole) == cont)
+                            {
+                                return +1;
+                            }
+                            if (WinChecker(x, y, acont, tpole) == acont)
+                            {
+                                return -1;
+                            }
+                            if (WinChecker(x, y, cont, tpole) == "  ")
+                            {
+                                return 0;
+                            }
+                            if (WinChecker(x, y, acont, tpole) == "  ")
+                            {
+                                return 0;
+                            }
+
+                        }
+                    }
+                }
+
+
+
+                for (int x = 0; x < 3; x++)
+                {
+                    for (int y = 0; y < 3; y++)
+                    {
+                        if (tpole[x, y] == null)
+                        {
+                            tpole[x, y] = acont;
+                            score = Minimax(tpole, true,cont);
+                            tpole[x, y] = null;
+                            if (score < Maxv)
+                            {
+                                Maxv = score;
+                            }
+                        }
+                    }
+                }
+                return Maxv;
+            }
+
+        }
+
+
+        public string WinChecker(int x, int y, string cont,string[,] pole)
+        {
+
+            if (x - 1 >= 0 & y - 1 >= 0)
+            {
+                     if (pole[x - 1, y - 1] == cont )
+                     {
+                      return LenghtChecker(x, y, -1, -1, cont);
+                     }
+            }
+             
+
+            if (x + 1 < 3 & y + 1 < 3)
+            {
+                if (pole[x + 1, y + 1] == cont)
+                {
+                     return LenghtChecker(x, y, -1, -1, cont);
+                }
+            }
+
+
+            if (y + 1 < 3)
+            {
+               if (pole[x, y + 1] == cont)
+               {
+                   return LenghtChecker(x, y, 0, -1, cont);
+               }
+            }
+
+
+            if (y - 1 >= 0 )
+            {
+                if (pole[x, y - 1] == cont )
+                {
+                    return LenghtChecker(x, y, 0, -1, cont);
+                }
+            }
+
+            if (x + 1 < 3 & y - 1 >= 0)
+            {
+                if (pole[x + 1, y - 1] == cont)
+                {
+                   return LenghtChecker(x, y, 1, -1, cont);
+                }
+            }
+
+            if (x - 1 >= 0 & y + 1 < 3)
+            {
+               if (pole[x - 1, y + 1] == cont)
+               {
+                   return LenghtChecker(x, y, 1, -1, cont);
+               }
+            }
+
+
+            if (x - 1 >= 0 )
+            {
+                   if (pole[x - 1, y] == cont )
+                   {
+                   return LenghtChecker(x, y, -1, 0, cont);
+                   }
+            }
+
+
+
+
+            if (x + 1 < 3)
+            {
+               if ( pole[x + 1, y] == cont)
+               {
+                   return LenghtChecker(x, y, -1,0, cont);
+               }
+            }
+
+
+
+
+           
+      
+            return " ";
+        }
+
+        private string LenghtChecker(int x, int y, int xc, int yc,string cont)
         {
             int xs = x;
             int ys = y;
             int contLenght = 1;
+            bool bl = true;
            
 
-             while (pole[xs + xc, ys + yc] == cont)
+             while (bl)
              {
-                contLenght++;
-                xs += xc;
-                ys += yc;
+                bl = false;
+                if (xs + xc >= 0 & ys + yc >= 0 & xs + xc < 3 & ys + yc < 3)
+                {
+                    if (pole[xs + xc, ys + yc] == cont)
+                    {
+                        bl = true;
+                        contLenght++;
+                        xs += xc;
+                        ys += yc;
+                    }
+                }
+
              }
 
             xs = x;
             ys = y;
+            bl = true;
 
-            while (pole[xs - xc, ys - yc] == cont)
+            while (bl)
             {
-                contLenght++;
-                xs -= xc;
-                ys -= yc;
+                bl = false;
+                if (xs - xc >= 0 & ys - yc >= 0 & xs - xc < 3 & ys - yc < 3)
+                {
+                    if (pole[xs - xc, ys - yc] == cont)
+                    {
+                        bl = true;
+                        contLenght++;
+                        xs -= xc;
+                        ys -= yc;
+                    }
+                }
+                     
             }
-
-            if (contLenght == 5)
+            int count = 0;
+            foreach (string item in pole)
             {
-                MessageBox.Show($"Hráč ktarý hrál s {cont} vyhrál :D");
-                Array.Clear(pole, 0, pole.Length);
-                return true;
+                if (item=="X"||item=="O")
+                {
+                    count++;
+                }
+            }
+          
+            if (contLenght == 3)
+            {
+               
+                
+                return cont;
                
             }
-            else { return false; }
+            if (count ==9)
+            {
+                return "  ";
+            }
+           return " ";
         }
     }
 
