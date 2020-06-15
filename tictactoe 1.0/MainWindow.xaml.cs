@@ -172,7 +172,7 @@ namespace tictactoe_1._0
                 {
                     if (tpole[x, y] == null)
                     {
-                        tpole[x, y] = "cont";
+                        tpole[x, y] = cont;
                         score = Minimax(tpole, true,cont);
                         tpole[x, y] = null;
                         if (score>Minv)
